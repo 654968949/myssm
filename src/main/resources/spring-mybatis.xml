@@ -9,9 +9,9 @@
                         http://www.springframework.org/schema/tx
                         http://www.springframework.org/schema/tx/spring-tx.xsd">
 
-    <!-- 自动扫描 -->
-    <context:component-scan base-package="com.wyz"/>
-    <!--加载配置文件-->
+<!--    &lt;!&ndash; 自动扫描 &ndash;&gt;-->
+<!--    <context:component-scan base-package="com.wyz"/>-->
+<!--    &lt;!&ndash;加载配置文件&ndash;&gt;-->
     <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="location" value="classpath:jdbc.properties"/>
     </bean>
@@ -46,7 +46,14 @@
     <!-- spring和MyBatis完美整合，不需要mybatis的配置映射文件 -->
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource" />
-        <!-- 自动扫描mapping.xml文件
-        <property name="mapperLocations" value="classpath:com/onyx/mapper/*.xml"></property> -->
+        <!-- 自动扫描mapping.xml文件 -->
+        <property name="mapperLocations" value="classpath:mapper/*.xml"></property>
     </bean>
+
+    <!-- 接口开发,扫描 com.core.dao包 ，写在此包下的接口即可被扫描到 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.wyz.dao" />
+    </bean>
+    <!-- 配置扫描@Service注解 -->
+    <context:component-scan base-package="com.wyz.service"/>
 </beans>

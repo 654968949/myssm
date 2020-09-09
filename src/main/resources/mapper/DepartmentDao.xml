@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wyz.dao.DepartmentDao">
+
+    <resultMap type="com.wyz.entity.Department" id="DepartmentMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="departmentName" column="department_name" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id" jdbcType="INTEGER"/>
+        <result property="serverCreateTime" column="server_create_time" jdbcType="TIMESTAMP"/>
+        <result property="serverUpdateTime" column="server_update_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <resultMap type="com.wyz.entity.Employee" id="EmployeeMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="employeeName" column="employee_name" jdbcType="VARCHAR"/>
+        <result property="departmentId" column="department_id" jdbcType="INTEGER"/>
+        <result property="job" column="job" jdbcType="VARCHAR"/>
+        <result property="salary" column="salary" jdbcType="VARCHAR"/>
+        <result property="serverCreateTime" column="server_create_time" jdbcType="TIMESTAMP"/>
+        <result property="serverUpdateTime" column="server_update_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="DepartmentMap">
+        select
+          id, department_name, parent_id, server_create_time, server_update_time
+        from myssm.department
+        where id = #{id}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="DepartmentMap">
+        select
+          id, department_name, parent_id, server_create_time, server_update_time
+        from myssm.department
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="DepartmentMap">
+        select
+        id, department_name, parent_id, server_create_time, server_update_time
+        from myssm.department
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="departmentName != null and departmentName != ''">
+                and department_name = #{departmentName}
+            </if>
+            <if test="parentId != null">
+                and parent_id = #{parentId}
+            </if>
+            <if test="serverCreateTime != null">
+                and server_create_time = #{serverCreateTime}
+            </if>
+            <if test="serverUpdateTime != null">
+                and server_update_time = #{serverUpdateTime}
+            </if>
+        </where>
+    </select>
+
+    <!--    查询某部门下所有子部门-->
+    <select id="queryAllById" resultMap="DepartmentMap">
+        select
+        id,department_name, parent_id, server_create_time, server_update_time
+        from
+        (
+            select
+                t1.id,t1.department_name,parent_id,server_update_time,server_create_time,
+                if(find_in_set(parent_id, @pids) > 0,
+                @pids := concat(@pids, ',', id),
+                0) as ischild
+            from
+                (
+                select
+                    id,
+                    department_name,
+                    parent_id,
+                    server_create_time,
+                    server_update_time
+                from
+                    myssm.department t
+                order by
+                    parent_id,
+                    id ) t1,
+                (
+                select @pids := #{id}) t2 ) t3
+    where
+	ischild != 0
+    </select>
+
+    <!--    获取部门下所有的员工-->
+    <select id="getAllEmployee" resultMap="EmployeeMap">
+
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into myssm.department(department_name, parent_id, server_create_time, server_update_time)
+        values (#{departmentName}, #{parentId}, #{serverCreateTime}, #{serverUpdateTime})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update myssm.department
+        <set>
+            <if test="departmentName != null and departmentName != ''">
+                department_name = #{departmentName},
+            </if>
+            <if test="parentId != null">
+                parent_id = #{parentId},
+            </if>
+            <if test="serverCreateTime != null">
+                server_create_time = #{serverCreateTime},
+            </if>
+            <if test="serverUpdateTime != null">
+                server_update_time = #{serverUpdateTime},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from myssm.department where id = #{id}
+    </delete>
+
+
+
+</mapper>
